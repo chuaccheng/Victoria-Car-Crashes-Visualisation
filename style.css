@@ -1,0 +1,61 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+.legend {
+  position: absolute;
+  width: 250px;
+  margin: 10px;
+  padding-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 30px;
+  background-color: white;
+  font: 12px Arial, sans-serif;
+}
+
+.legend h4 {
+  margin: 0 0 10px;
+}
+
+/* sets the default settings for creating the circles (these are actually squares with their corners rounded)*/
+
+.legend-circle {
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+/* sets the specifics for the status text */
+
+.legend-status span {
+  margin-left: 5px;
+  display: inline-block;
+  font: 12px Arial, sans-serif;
+}
+
+/* sets the specifics for the building height text */
+
+.legend-height span {
+  margin: 3px;
+  display: inline-block;
+  vertical-align: middle;
+  font: 12px Arial, sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: #2dc4b2;
+}
+
+.menu {
+	padding-bottom: 10px;
+}

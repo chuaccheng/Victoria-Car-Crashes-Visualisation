@@ -1,0 +1,243 @@
+<!DOCTYPE HTML>
+
+<!--Code by Cheng Chua for GEOM90007 Assignment 2 -->
+<!--Tutorial by Mapbox (https://docs.mapbox.com/help/tutorials/show-changes-over-time/)
+	and Lab Exercises by GEOM90007 Tutors -->
+
+<head>
+<meta charset='utf-8' />
+<title>Assignment 2: Victoria Car Crashes</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.1/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.3.1/mapbox-gl.css' rel='stylesheet' />
+<link rel="stylesheet" type="text/css" href="style.css">
+	
+
+</head>
+
+<body>
+<div id='map'></div>
+<div id='legend' class='legend'>
+  <h1>Alcohol, Weekday Traffic, and Young Drivers: A closer look at risk factors of car crashes in Melbourne</h1>
+  <p>Data: <a href='https://discover.data.vic.gov.au/dataset/crashes-last-five-years'>Crashes for the last five years</a> in Melbourne, Australia, Sep 2019 (VicRoads)</p>
+
+<div class="menu">
+  <div class='row' id='filters'>
+  <h4>Day of the week</h4>
+    <input id='all' type='radio' name='toggle' value='all' checked='checked'>
+    <label for='all'>All</label>
+    <input id='weekday' type='radio' name='toggle' value='weekday'>
+    <label for='weekday'>Weekday</label>
+    <input id='weekend' type='radio' name='toggle' value='weekend'>
+    <label for='weekend'>Weekend</label>
+    <br><br>
+  </div>
+
+
+   <div class='row' id='filter2'>
+  <h4>Alcohol related?</h4>
+    <input id='all2' type='radio' name='ktoggle' value='all2' checked='checked'>
+    <label for='all2'>All</label>
+    <input id='yesAlcohol' type='radio' name='ktoggle' value='yesAlcohol'>
+    <label for='yesAlcohol'>Yes</label>
+    <input id='noAlcohol' type='radio' name='ktoggle' value='noAlcohol'>
+    <label for='noAlcohol'>No</label>
+    <br><br>
+  </div>
+
+
+   <div class='row' id='filter3'>
+  <h4>Young driver?</h4>
+    <input id='all3' type='radio' name='btoggle' value='all3' checked='checked'>
+    <label for='all3'>All</label>
+    <input id='yesYouth' type='radio' name='btoggle' value='yesYouth'>
+    <label for='yesYouth'>Yes</label>
+    <input id='noYouth' type='radio' name='btoggle' value='noYouth'>
+    <label for='noYouth'>No</label>
+    <br><br>
+  </div>
+</div>
+</div>
+</div>
+<br><br>
+</body>
+<script type="text/javascript">
+	
+	// Load my mapbox map style using my map access code
+mapboxgl.accessToken = 'pk.eyJ1IjoiY2hlbmdjaHVhIiwiYSI6ImNqenVoNXVuZTAzemszaHFraXhvMmpzNjUifQ.aXZwSXXOaTdS55_H6oziXg';
+
+var map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/chengchua/ck0j00ij10igv1dnmpmwdf0d7',
+  center: [144.96, -37.8157],
+  zoom: 14
+});
+
+map.on('load', function() {
+  var filterDay = ['!=', ['string', ['get', 'DAY_OF_WEEK']], 'placeholder'];
+  var filterAlc = ['!=', ['string', ['get', 'ALCOHOL_RELATED']], 'placeholder'];
+  var filterYouth = ['match', ['get', 'YOUNG_DRIVER'], 500, false, true];
+
+  //Pop up showing the number of floors
+  map.on('click', 'collisions', function(e) {
+    new mapboxgl.Popup()
+      .setLngLat(e.lngLat)
+      .setHTML("<b>Time of accident: " + e.features[0].properties.ACCIDENT_TIME
+      	+ "<br>"+
+      "<b>Date of accident: " + e.features[0].properties.ACCIDENT_DATE
+      + "<br>"+
+      "<b>Type of accident: " + e.features[0].properties.ACCIDENT_TYPE)
+      .addTo(map);
+  });
+
+  // when mouse is over a point change the cursor to a pointer 
+  map.on('mouseenter', 'collisions', function() {
+    map.getCanvas().style.cursor = 'pointer';
+  });
+
+  // And then change it back to default map pan cursor
+  map.on('mouseleave', 'collisions', function() {
+    map.getCanvas().style.cursor = '';
+  });
+
+  // defining variables for the legend
+  var severity = ['Other injury accident','Serious injury accident','Fatal accident'];
+  var circleColors = [ '#fbb03b','#3bb2d0','#e55e5e'];
+  var circleRadius = [2, 4, 6, 8, 10, 12];
+  var casualties = [0, 1, 2, 3, 4, 5];
+
+  map.addLayer({
+    id: 'collisions',
+    type: 'circle',
+    source: {
+      type: 'vector',
+      url: 'mapbox://chengchua.9hajo2uf' // Your Mapbox Tileset Map ID
+    },
+
+    'source-layer': 'Crashes_Last_Five_Years-cpbrg5', // the name of your new point layer (see tileset)
+  
+    filter: ['all', filterDay, filterAlc],
+    paint: {
+      'circle-color': {
+        property: 'SEVERITY',
+        type: 'categorical',
+        stops: [
+          [severity[0], circleColors[0]],
+          [severity[1], circleColors[1]],
+          [severity[2], circleColors[2]]
+        ]
+      },
+      'circle-opacity': 0.7,
+       //mid grey
+      'circle-radius': {
+        property: 'INJ_OR_FATAL',
+        type: 'interval',
+        stops: [
+          [casualties[0], circleRadius[0]], // 0 – 4 floors 
+          [casualties[1], circleRadius[1]], // 5 – 14 floors (0 + 5)
+          [casualties[2], circleRadius[2]], // 15 – 29 floors (5 + 10)
+          [casualties[3], circleRadius[3]], // 30 – 49 floors (15 + 15)
+          [casualties[4], circleRadius[4]], // 50 – 74 floors (30 + 20) 
+          [casualties[5], circleRadius[5]] // Over 75 floors (50 + 25)
+        ]
+      },
+    },
+
+
+  });
+
+document.getElementById('filters').addEventListener('change', function(e) {
+  var day = e.target.value;
+  // update the map filter
+  if (day === 'all') {
+    filterDay = ['!=', ['string', ['get', 'DAY_OF_WEEK']], 'placeholder'];
+  } else if (day === 'weekday') {
+    filterDay = ['match', ['get', 'DAY_OF_WEEK'], ['Saturday', 'Sunday'], false, true];
+  } else if (day === 'weekend') {
+    filterDay = ['match', ['get', 'DAY_OF_WEEK'], ['Saturday', 'Sunday'], true, false];
+  } else {
+    console.log('error');
+  }
+  map.setFilter('collisions', ['all', filterDay, filterAlc, filterYouth]);
+});
+
+document.getElementById('filter2').addEventListener('change', function(e) {
+  var alcohol = e.target.value;
+  // update the map filter
+  if (alcohol === 'all2') {
+    filterAlc = ['!=', ['string', ['get', 'ALCOHOL_RELATED']], 'placeholder'];
+  } else if (alcohol === 'yesAlcohol') {
+    filterAlc = ['match', ['get', 'ALCOHOL_RELATED'], ['No'], false, true];
+  } else if (alcohol === 'noAlcohol') {
+    filterAlc = ['match', ['get', 'ALCOHOL_RELATED'], ['No'], true, false];
+  } else {
+    console.log('error');
+  }
+  map.setFilter('collisions', ['all', filterDay, filterAlc, filterYouth]);
+});
+
+
+document.getElementById('filter3').addEventListener('change', function(e) {
+  var youth = e.target.value;
+  // update the map filter
+  if (youth === 'all3') {
+    filterYouth = ['match', ['get', 'YOUNG_DRIVER'], 500, false, true];
+  } else if (youth === 'yesYouth') {
+    filterYouth = ['match', ['get', 'YOUNG_DRIVER'], 0, false, true];
+  } else if (youth === 'noYouth') {
+    filterYouth = ['match', ['get', 'YOUNG_DRIVER'], 0, true, false];
+  } else {
+    console.log('error');
+  }
+  map.setFilter('collisions', ['all', filterDay, filterAlc, filterYouth]);
+});
+
+// adding the legend onto a map
+for (i = 0; i < severity.length; i++) {
+    var statusName = severity[i];
+    var circleColor = circleColors[i];
+    var item = document.createElement('div');
+    item.className = 'legend-status';
+    var key = document.createElement('span');
+    key.className = 'legend-circle';
+    key.style.backgroundColor = circleColor;
+    key.style.width = '12px';
+    key.style.height = '12px';
+    var value = document.createElement('span');
+    value.innerHTML = statusName;
+    item.appendChild(key);
+    item.appendChild(value);
+    legend.appendChild(item);
+  }
+
+  for (i = 0; i < casualties.length; i++) {
+    var casualty = casualties[i];
+    var diameter = circleRadius[i] * 2;
+    var setmargin = 0 + ((20 - diameter) / 2);
+    var item = document.createElement('div');
+    item.className = 'legend-height';
+    var key = document.createElement('span');
+    key.className = 'legend-circle';
+    key.style.width = diameter + 'px';
+    key.style.height = diameter + 'px';
+    key.style.marginLeft = setmargin + 'px';
+    key.style.backgroundColor = '#666666';
+    key.style.opacity = 0.8;
+    var value = document.createElement('span');
+    value.style.marginLeft = setmargin + 10 + 'px';
+    value.innerHTML = '> ' + casualty + ' casualties';
+    value.style.backgroundColor = 'white';
+    item.appendChild(key);
+    item.appendChild(value);
+    legend.appendChild(item);
+  }
+
+});
+
+
+
+
+</script>
+</html>
+
+
