@@ -1,3 +1,8 @@
+/*
+Code by Cheng Chua for GEOM90007 Assignment 2
+Tutorial by Mapbox (https://docs.mapbox.com/help/tutorials/show-changes-over-time/)
+  and Lab Exercises by GEOM90007 Tutors */
+
 body {
   margin: 0;
   padding: 0;
@@ -10,6 +15,7 @@ body {
   width: 100%;
 }
 
+/* styling for the legend */
 .legend {
   position: absolute;
   width: 250px;
@@ -26,7 +32,7 @@ body {
   margin: 0 0 10px;
 }
 
-/* sets the default settings for creating the circles (these are actually squares with their corners rounded)*/
+/* styling for the circles */
 
 .legend-circle {
   border-radius: 50%;
@@ -36,7 +42,7 @@ body {
 
 /* sets the specifics for the status text */
 
-.legend-status span {
+.crash-severity span {
   margin-left: 5px;
   display: inline-block;
   font: 12px Arial, sans-serif;
@@ -44,18 +50,21 @@ body {
 
 /* sets the specifics for the building height text */
 
-.legend-height span {
+.crash-casualty span {
   margin: 3px;
   display: inline-block;
   vertical-align: middle;
   font: 12px Arial, sans-serif;
 }
 
+/* text decoration for links */
+
 a {
   text-decoration: none;
   color: #2dc4b2;
 }
 
+/* slight padding for the radio button menu */
 .menu {
 	padding-bottom: 10px;
 }
